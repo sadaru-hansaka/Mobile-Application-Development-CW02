@@ -69,7 +69,10 @@ fun GUI(){
         }) {
             Text(text = "Search For Movies")
         }
-        Button(onClick = {}) {
+        Button(onClick = {
+            var x = Intent(context, SearchActors::class.java)
+            context.startActivity(x)
+        }) {
             Text(text = "Search for Actors")
         }
         Button(onClick = {

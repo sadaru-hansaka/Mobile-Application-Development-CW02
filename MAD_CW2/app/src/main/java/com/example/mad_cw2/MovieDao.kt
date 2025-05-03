@@ -18,6 +18,9 @@ interface MovieDao {
     suspend fun insertMovie(movie: Movie)
 
     @Delete
-    suspend fun insertUser(movie: Movie)
+    suspend fun deleteMovie(movie: Movie)
+
+    @Query("select * from Movie where actor LIKE '%'||:actor||'%'")
+    suspend fun searchMovieByActor(actor:String):List<Movie>
 
 }

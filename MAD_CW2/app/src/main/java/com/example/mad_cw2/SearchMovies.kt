@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.room.Room
 import com.example.mad_cw2.ui.theme.MAD_CW2Theme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,6 +42,10 @@ import java.net.URL
 class SearchMovies : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        database = Room.databaseBuilder(this, AppDatabase::class.java, "movie-database").build()
+        movieDao = database.movieDao()
+
         enableEdgeToEdge()
         setContent {
             searchMovie()
@@ -52,30 +57,43 @@ class SearchMovies : ComponentActivity() {
 fun searchMovie(){
     var movieInfo by remember { mutableStateOf("") }
     var keyword by remember { mutableStateOf("") }
+    var lastJson by remember { mutableStateOf("") }
 
     val scope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize().padding(10.dp,60.dp,10.dp,10.dp),
+//        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        Text(text = "Enter Movie Name")
         TextField(
             value = keyword,
             onValueChange = {keyword = it},
-            modifier = Modifier.padding(16.dp)
+            label = { Text("Enter Movie Name") },
+//            modifier = Modifier.padding(16.dp)
         )
         Row{
             Button(onClick = {
                 scope.launch {
-                    movieInfo = fetchMovies(keyword)
+                    val (info, json) = fetchMovies(keyword)
+                    movieInfo = info
+                    lastJson = json
                 }
             }) {
                 Text(text = "Retrieve Movie")
             }
             Spacer(Modifier.width(15.dp))
-            Button(onClick = {  }) {
+            Button(onClick = {
+                scope.launch {
+                    try {
+                        val movie = parseJsonToEntity(lastJson)
+                        movieDao.insertMovie(movie)
+                        movieInfo = "Movie saved"
+                    }catch (e:Exception){
+                        movieInfo = "No movie found"
+                    }
+                }
+            }) {
                 Text(text = "Save Movie to DB")
             }
         }
@@ -83,7 +101,7 @@ fun searchMovie(){
     }
 }
 
-suspend fun fetchMovies(keyword: String): String {
+suspend fun fetchMovies(keyword: String): Pair<String, String> {
     val urlString = "https://www.omdbapi.com/?t=${keyword}&apikey="
 
     return try {
@@ -101,10 +119,11 @@ suspend fun fetchMovies(keyword: String): String {
             bf.close()
         }
 
-        parseJSON(stb)
+        val info = parseJSON(StringBuilder(stb.toString()))
+        Pair(info, stb.toString())
     } catch (e: Exception) {
         e.printStackTrace()
-        "Error fetching movie: ${e.message}"
+        Pair("Error fetching movie: ${e.message}", "")
     }
 }
 
@@ -143,3 +162,19 @@ fun parseJSON(stb: StringBuilder): String {
 
 
 
+fun parseJsonToEntity(jsonString: String): Movie {
+    val json = JSONObject(jsonString)
+
+    return Movie(
+        title = json.optString("Title", "N/A"),
+        year = json.optString("Year", "N/A"),
+        rated = json.optString("Rated", "N/A"),
+        release = json.optString("Released", "N/A"),
+        runtime = json.optString("Runtime", "N/A"),
+        genre = json.optString("Genre", "N/A"),
+        director = json.optString("Director", "N/A"),
+        writer = json.optString("Writer", "N/A"),
+        actor = json.optString("Actors", "N/A"),
+        plot = json.optString("Plot", "N/A")
+    )
+}
