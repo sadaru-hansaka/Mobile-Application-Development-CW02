@@ -7,14 +7,14 @@ import androidx.room.PrimaryKey
 data class Movie (
     @PrimaryKey(autoGenerate = true)var id: Int = 0,
 
-    val title:String?,
-    val year:String?,
-    var rated:String?,
-    var release:String?,
-    var runtime:String?,
-    var genre:String?,
-    var director:String?,
-    var writer:String?,
-    var actor:String?,
-    var plot:String?
+    val title:String,
+    val year:String,
+    var rated:String,
+    var release:String,
+    var runtime:String,
+    var genre:String,
+    var director:String,
+    var writer:String,
+    var actor:String,
+    var plot:String
 )

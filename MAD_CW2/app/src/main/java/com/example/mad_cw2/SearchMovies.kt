@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -21,6 +23,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,24 +58,32 @@ class SearchMovies : ComponentActivity() {
 
 @Composable
 fun searchMovie(){
-    var movieInfo by remember { mutableStateOf("") }
-    var keyword by remember { mutableStateOf("") }
-    var lastJson by remember { mutableStateOf("") }
+    var movieInfo by rememberSaveable { mutableStateOf("") }
+    var keyword by rememberSaveable  { mutableStateOf("") }
+    var lastJson by rememberSaveable { mutableStateOf("") }
 
     val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier.fillMaxSize().padding(10.dp,60.dp,10.dp,10.dp),
-//        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        verticalArrangement = Arrangement.Top
     ){
+        Text(
+            text = "Search for Movies",
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(bottom = 10.dp)
+        )
         TextField(
             value = keyword,
             onValueChange = {keyword = it},
             label = { Text("Enter Movie Name") },
-//            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.fillMaxWidth().padding(10.dp)
         )
-        Row{
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.Center
+
+        ){
             Button(onClick = {
                 scope.launch {
                     val (info, json) = fetchMovies(keyword)
@@ -87,8 +98,13 @@ fun searchMovie(){
                 scope.launch {
                     try {
                         val movie = parseJsonToEntity(lastJson)
-                        movieDao.insertMovie(movie)
-                        movieInfo = "Movie saved"
+                        val existing = movieDao.getMovieByTitle(movie.title)
+                        if(existing == null){
+                            movieDao.insertMovie(movie)
+                            movieInfo = "Movie saved"
+                        }else{
+                            movieInfo = "Movie already exists"
+                        }
                     }catch (e:Exception){
                         movieInfo = "No movie found"
                     }

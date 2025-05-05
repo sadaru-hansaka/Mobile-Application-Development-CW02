@@ -2,4 +2,5 @@
     <string name="app_name">MAD_CW2</string>
     <string name="title_activity_search_movies">SearchMovies</string>
     <string name="title_activity_search_actors">SearchActors</string>
+    <string name="title_activity_search_movies_by_substring">SearchMoviesBySubstring</string>
 </resources>

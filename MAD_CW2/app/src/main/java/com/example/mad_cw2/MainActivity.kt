@@ -76,11 +76,24 @@ fun GUI(){
             Text(text = "Search for Actors")
         }
         Button(onClick = {
+            var y = Intent(context, SearchMoviesBySubstring::class.java)
+            context.startActivity(y)
+        }) {
+            Text(text = "Fetch Movies")
+        }
+        Button(onClick = {
             scope.launch {
                 movieData = retrieveData(movieDao)
             }
         }) {
             Text(text = "Check")
+        }
+        Button(onClick = {
+            scope.launch {
+                movieDao.deleteMovie(getMovieData()[0])
+            }
+        }) {
+            Text(text = "Delete")
         }
         Text(
             text = movieData
@@ -100,7 +113,7 @@ suspend fun retrieveData(movieDao: MovieDao):String{
 
 fun getMovieData():List<Movie>{
     return listOf(
-        Movie(1,
+        Movie(0,
             "The Shawshank Redemption",
             "1994",
             "R",
@@ -112,7 +125,7 @@ fun getMovieData():List<Movie>{
             "Tim Robbins, Morgan Freeman, Bob Gunton",
             "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency."
         ),
-        Movie(2,
+        Movie(0,
             "Batman: The Dark Knight Returns, Part 1",
             "2012",
             "PG-13",
@@ -125,7 +138,7 @@ fun getMovieData():List<Movie>{
             "Batman has not been seen for ten years. A new breed of criminal ravages Gotham City, forcing 55-year-old Bruce Wayne back into the cape and cowl. But, does he still have what it takes to fight crime in a new era?"
         ),
         Movie(
-            3,
+            0,
             "The Lord of the Rings: The Return of the King",
             "2003",
             "PG-13",
@@ -138,7 +151,7 @@ fun getMovieData():List<Movie>{
             "Gandalf and Aragorn lead the World of Men against Sauron's army to draw his gaze from Frodo and Sam as they approach Mount Doom with the One Ring."
         ),
         Movie(
-            4,
+            0,
             "Inception",
             "2010",
             "PG-13",
@@ -151,7 +164,7 @@ fun getMovieData():List<Movie>{
             "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O., but his tragic past may doom the project and his team to disaster."
         ),
         Movie(
-            5,
+            0,
             "The Matrix",
             "1999",
             "R",

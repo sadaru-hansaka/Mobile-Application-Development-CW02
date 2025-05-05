@@ -17,6 +17,9 @@ interface MovieDao {
     @Insert
     suspend fun insertMovie(movie: Movie)
 
+    @Query("select * from Movie where title= :title")
+    suspend fun getMovieByTitle(title: String): Movie?
+
     @Delete
     suspend fun deleteMovie(movie: Movie)
 
